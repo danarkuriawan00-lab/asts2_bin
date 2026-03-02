@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Asesmen SDN 1 Gondang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0284c7;
+            --secondary-blue: #93c5fd;
+            --accent-green: #10b981;
+            --bg-gray: #f3f4f6;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            max-height: 850px;
+            background-color: #ffffff;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            position: relative;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 640px) {
+            .app-container {
+                height: 90vh;
+                border-radius: 24px;
+            }
+        }
+
+        .font-sahabat {
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.1em;
+            background: linear-gradient(to bottom, #1e293b, #334155);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(1px 1px 0px rgba(255,255,255,0.3));
+        }
+
+        .btn-masuk {
+            background-color: var(--accent-green);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-masuk:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-nav {
+            background-color: var(--primary-blue);
+            border-radius: 12px;
+            color: white;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .option-item {
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+
+        .selected-option {
+            background-color: #dbeafe !important;
+            border-color: #3b82f6 !important;
+            transform: translateX(8px);
+        }
+
+        #loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(4px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            color: white;
+        }
+
+        .input-field {
+            background-color: #ffffff;
+            color: #1e293b;
+            text-align: center;
+            font-weight: bold;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            border: 2px solid #cbd5e1;
+            outline: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container p-6" id="app">
+    <div id="loading-overlay">
+        <div class="animate-spin rounded-full h-14 w-14 border-4 border-blue-400 border-t-transparent mb-4"></div>
+        <p class="font-bold text-lg">Memproses Data...</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="flex flex-col items-center justify-center h-full">
+        <div class="mb-6">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiUAgnz3M-C0b4aP4NCccOVpRTBjimetBgZhyphenhyphenkGcMIcG3YY7RhacnjOZFFonylLQGbQ0LQHR7n4cOk7XN8mDb9YmRrXgJi5q7yZCEEKpQ4CYuB9WaZLCNw35_qVPvcRTizOMvZXsYVqmAOSfxDv9bUmpB9z_-2G3ecR_C1CONgsQ5-5U5NA2B9rpU4zfJnZ/w200-h200/sdn%20gng%201.png" alt="Logo SDN 1 Gondang" class="w-28 h-28 object-contain">
+        </div>
+
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-900 leading-tight uppercase">Selamat Datang</h1>
+            <h2 class="text-5xl font-black mb-2 font-sahabat uppercase">Sahabat</h2>
+            <p class="text-[10px] text-gray-600 font-medium tracking-widest uppercase text-center">
+                Sistem Asesmen Hasil Amanah Berprestasi Akurat & Terpercaya
+            </p>
+        </div>
+
+        <div class="w-full space-y-4">
+            <input type="text" id="name" placeholder="NAMA LENGKAP" class="input-field uppercase">
+            <input type="number" id="absen" placeholder="NOMOR ABSEN" class="input-field">
+            <button onclick="startExam()" class="w-full py-4 mt-2 rounded-xl btn-masuk text-white font-bold text-lg shadow-lg uppercase">
+                Mulai Ujian
+            </button>
+        </div>
+    </div>
+
+    <!-- Exam Screen -->
+    <div id="exam-screen" class="hidden flex flex-col h-full">
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-6">
+            <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase">
+                Soal <span id="current-number">1</span> / <span id="total-questions">0</span>
+            </span>
+            <span id="timer" class="text-gray-700 font-mono font-bold text-sm">00:00</span>
+        </div>
+        
+        <div class="flex-grow">
+            <div class="bg-blue-50 rounded-2xl p-5 mb-6 border-l-4 border-blue-600">
+                <p id="question-text" class="text-base font-bold text-gray-800 leading-relaxed">Memuat...</p>
+            </div>
+            <div id="options-container" class="space-y-3"></div>
+        </div>
+
+        <div class="flex justify-between items-center mt-6 pb-4 gap-3">
+            <button onclick="prevQuestion()" id="prev-btn" class="btn-nav flex-1 opacity-50" disabled>KEMBALI</button>
+            <button onclick="handleNext()" class="btn-nav flex-1" id="next-btn">LANJUT</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 class="text-xl font-bold mb-2">Selesai?</h3>
+        <p class="text-sm text-gray-600 mb-6">Pastikan semua jawaban sudah terisi.</p>
+        <div class="flex gap-3">
+            <button onclick="hideConfirm()" class="flex-1 py-3 border border-gray-300 rounded-xl font-bold text-gray-500">BATAL</button>
+            <button onclick="finishExam()" class="flex-1 py-3 bg-green-500 text-white rounded-xl font-bold">KIRIM</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz1sq6Ks2rC3lIdcA3i9TRLPebUdny0st73zmcZXI7HVVSZ63hxJWsz3_rVOH3L0gdO/exec'; 
+
+    const questions = [
+        { 
+    id: 1, 
+    text: "Pernyataan dalam iklan yang dapat dibuktikan kebenarannya dan berdasarkan data disebut ....", 
+    options: [{id:'A', text:'Opini'}, {id:'B', text:'Saran'}, {id:'C', text:'Fakta'}, {id:'D', text:'Khayalan'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 2, 
+    text: "Perhatikan kalimat iklan berikut: 'Susu ini mengandung kalsium 500mg'. Kalimat tersebut termasuk ....", 
+    options: [{id:'A', text:'Opini'}, {id:'B', text:'Fakta'}, {id:'C', text:'Rayuan'}, {id:'D', text:'Semboyan'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 3, 
+    text: "Kalimat opini dalam iklan biasanya ditandai dengan kata-kata yang bersifat subjektif, seperti ....", 
+    options: [{id:'A', text:'Paling lezat'}, {id:'B', text:'Berat 1 kg'}, {id:'C', text:'Buka pukul 08.00'}, {id:'D', text:'Diskon 50%'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 4, 
+    text: "Manakah kalimat berikut yang merupakan opini dalam sebuah iklan sepatu?", 
+    options: [{id:'A', text:'Tersedia ukuran 38 sampai 42'}, {id:'B', text:'Terbuat dari kulit sapi asli'}, {id:'C', text:'Sepatu tercanggih yang membuatmu terbang'}, {id:'D', text:'Toko buka setiap hari Senin-Sabtu'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 5, 
+    text: "Tujuan penggunaan opini dalam iklan adalah untuk ....", 
+    options: [{id:'A', text:'Memberikan data akurat'}, {id:'B', text:'Menarik minat pembeli'}, {id:'C', text:'Menjelaskan alamat toko'}, {id:'D', text:'Menuliskan daftar harga'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 6, 
+    text: "Iklan: 'Keripik Tempe Pak Kumis, Gurihnya Tiada Duanya'. Kalimat tersebut adalah ....", 
+    options: [{id:'A', text:'Fakta'}, {id:'B', text:'Opini'}, {id:'C', text:'Berita'}, {id:'D', text:'Informasi'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 7, 
+    text: "Iklan: 'Beli 2 gratis 1 hanya hari ini'. Kalimat tersebut termasuk fakta karena ....", 
+    options: [{id:'A', text:'Berisi pendapat penjual'}, {id:'B', text:'Dapat dibuktikan kebenaran promonya'}, {id:'C', text:'Sangat menarik didengar'}, {id:'D', text:'Menggunakan bahasa yang indah'}], 
+    correct: 'B' 
+  },
+
+  // --- SINGKATAN DAN AKRONIM (8-14) ---
+  { 
+    id: 8, 
+    text: "Kependekan yang berupa huruf atau gabungan huruf yang dieja huruf demi huruf disebut ....", 
+    options: [{id:'A', text:'Akronim'}, {id:'B', text:'Singkatan'}, {id:'C', text:'Ringkasan'}, {id:'D', text:'Sandi'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 9, 
+    text: "Kependekan yang berupa gabungan suku kata dan dilafalkan sebagai kata yang wajar disebut ....", 
+    options: [{id:'A', text:'Singkatan'}, {id:'B', text:'Sinonim'}, {id:'C', text:'Akronim'}, {id:'D', text:'Antonim'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 10, 
+    text: "Contoh akronim yang benar adalah ....", 
+    options: [{id:'A', text:'KTP'}, {id:'B', text:'SD'}, {id:'C', text:'Daring'}, {id:'D', text:'WIB'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 11, 
+    text: "Singkatan dari 'atas nama' yang benar menurut PUEBI/EYD adalah ....", 
+    options: [{id:'A', text:'a/n'}, {id:'B', text:'A.N'}, {id:'C', text:'a.n.'}, {id:'D', text:'an'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 12, 
+    text: "Puskesmas merupakan akronim dari ....", 
+    options: [{id:'A', text:'Pusat Kesehatan Masyarakat'}, {id:'B', text:'Pusat Kesejahteraan Masyarakat'}, {id:'C', text:'Pusat Keselamatan Masyarakat'}, {id:'D', text:'Pusat Kesatuan Masyarakat'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 13, 
+    text: "Kependekan 'Yth.' biasanya digunakan dalam surat untuk menyingkat kata ....", 
+    options: [{id:'A', text:'Yang Terhormat'}, {id:'B', text:'Yang Terkasih'}, {id:'C', text:'Yang Tertinggi'}, {id:'D', text:'Yang Terpuji'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 14, 
+    text: "Manakah yang merupakan singkatan nama orang?", 
+    options: [{id:'A', text:'Rudal'}, {id:'B', text:'W.R. Supratman'}, {id:'C', text:'Siskamling'}, {id:'D', text:'Bulog'}], 
+    correct: 'B' 
+  },
+
+  // --- MENCARI INFORMASI DI INTERNET (15-20) ---
+  { 
+    id: 15, 
+    text: "Istilah untuk kata atau frasa yang digunakan untuk mencari informasi di mesin pencari adalah ....", 
+    options: [{id:'A', text:'Username'}, {id:'B', text:'Password'}, {id:'C', text:'Kata kunci (Keyword)'}, {id:'D', text:'Email'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 16, 
+    text: "Jika Budi ingin mencari informasi tentang cara menanam padi, kata kunci yang paling tepat adalah ....", 
+    options: [{id:'A', text:'Padi'}, {id:'B', text:'Petani di sawah'}, {id:'C', text:'Cara menanam padi'}, {id:'D', text:'Beras enak'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 17, 
+    text: "Saat mencari informasi di internet, sebaiknya kita memilih sumber yang ....", 
+    options: [{id:'A', text:'Paling berwarna'}, {id:'B', text:'Paling banyak fotonya'}, {id:'C', text:'Terpercaya dan akurat'}, {id:'D', text:'Muncul paling akhir'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 18, 
+    text: "Aplikasi yang digunakan untuk menjelajahi internet disebut ....", 
+    options: [{id:'A', text:'Browser'}, {id:'B', text:'Hardisk'}, {id:'C', text:'Keyboard'}, {id:'D', text:'Printer'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 19, 
+    text: "Bahaya dari mengambil informasi di internet tanpa mengecek kebenarannya adalah ....", 
+    options: [{id:'A', text:'Mendapat nilai bagus'}, {id:'B', text:'Menyebarkan berita bohong (hoaks)'}, {id:'C', text:'Komputer menjadi cepat'}, {id:'D', text:'Pulsa bertambah'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 20, 
+    text: "Simbol yang digunakan untuk mencari frasa yang spesifik di Google adalah tanda ....", 
+    options: [{id:'A', text:'Tanya (?)'}, {id:'B', text:'Seru (!)'}, {id:'C', text:'Petik dua (\" \")'}, {id:'D', text:'Persen (%)'}], 
+    correct: 'C' 
+  },
+
+  // --- MENULIS SURAT ELEKTRONIK / SUREL (21-26) ---
+  { 
+    id: 21, 
+    text: "Surat elektronik sering juga disebut dengan ....", 
+    options: [{id:'A', text:'Telegram'}, {id:'B', text:'Email/Surel'}, {id:'C', text:'Wesel'}, {id:'D', text:'Memo'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 22, 
+    text: "Bagian 'Subject' pada penulisan surel diisi dengan ....", 
+    options: [{id:'A', text:'Alamat pengirim'}, {id:'B', text:'Inti atau judul pesan'}, {id:'C', text:'Isi surat yang panjang'}, {id:'D', text:'Lampiran foto'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 23, 
+    text: "Salah satu kelebihan mengirim surat melalui surel dibandingkan surat pos adalah ....", 
+    options: [{id:'A', text:'Sampai sangat cepat'}, {id:'B', text:'Biayanya sangat mahal'}, {id:'C', text:'Bisa disentuh kertasnya'}, {id:'D', text:'Tidak butuh internet'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 24, 
+    text: "Fitur untuk melampirkan file dokumen atau gambar dalam surel disebut ....", 
+    options: [{id:'A', text:'Spam'}, {id:'B', text:'Draft'}, {id:'C', text:'Attachment'}, {id:'D', text:'Inbox'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 25, 
+    text: "Alamat surel yang benar penulisannya adalah ....", 
+    options: [{id:'A', text:'budi@gmail.com'}, {id:'B', text:'budi.gmail.com'}, {id:'C', text:'budi@gmail'}, {id:'D', text:'budi@com'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 26, 
+    text: "Pesan yang masuk ke dalam surel kita dapat dilihat pada menu ....", 
+    options: [{id:'A', text:'Sent'}, {id:'B', text:'Inbox/Kotak Masuk'}, {id:'C', text:'Trash'}, {id:'D', text:'Outbox'}], 
+    correct: 'B' 
+  },
+
+  // --- POSTER DAN KALIMAT PERINTAH (27-32) ---
+  { 
+    id: 27, 
+    text: "Kalimat perintah dalam poster sering menggunakan imbuhan ....", 
+    options: [{id:'A', text:'-kah'}, {id:'B', text:'-lah'}, {id:'C', text:'-pun'}, {id:'D', text:'-mu'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 28, 
+    text: "Contoh kalimat perintah yang tepat untuk poster lingkungan adalah ....", 
+    options: [{id:'A', text:'Lingkungan ini sangat bersih'}, {id:'B', text:'Buanglah sampah pada tempatnya!'}, {id:'C', text:'Mengapa sampah berserakan?'}, {id:'D', text:'Sampah plastik berbahaya'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 29, 
+    text: "Poster: 'Gunakanlah masker saat keluar rumah!'. Kalimat tersebut bertujuan untuk ....", 
+    options: [{id:'A', text:'Menghibur'}, {id:'B', text:'Memberitahu harganya'}, {id:'C', text:'Memerintah/Mengajak'}, {id:'D', text:'Menceritakan pengalaman'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 30, 
+    text: "Ciri bahasa poster yang baik adalah ....", 
+    options: [{id:'A', text:'Sangat panjang dan detail'}, {id:'B', text:'Singkat, padat, dan persuasif'}, {id:'C', text:'Menggunakan bahasa gaul'}, {id:'D', text:'Hanya terdiri dari satu kata'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 31, 
+    text: "Selain tulisan, unsur penting dalam poster agar menarik adalah ....", 
+    options: [{id:'A', text:'Musik'}, {id:'B', text:'Gambar/Ilustrasi'}, {id:'C', text:'Tanda tangan'}, {id:'D', text:'Daftar isi'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 32, 
+    text: "Kalimat perintah larangan dalam poster biasanya diawali dengan kata ....", 
+    options: [{id:'A', text:'Silakan'}, {id:'B', text:'Harap'}, {id:'C', text:'Jangan'}, {id:'D', text:'Tolong'}], 
+    correct: 'C' 
+  },
+
+  // --- PETUNJUK DAN IMBAUAN (33-38) ---
+  { 
+    id: 33, 
+    text: "Papan informasi yang bertuliskan 'Harap tenang, ada ujian' di sekolah termasuk jenis ....", 
+    options: [{id:'A', text:'Pengumuman'}, {id:'B', text:'Imbauan'}, {id:'C', text:'Iklan'}, {id:'D', text:'Cerita'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 34, 
+    text: "Petunjuk penggunaan alat bertujuan agar pengguna ....", 
+    options: [{id:'A', text:'Bisa menjual alat tersebut'}, {id:'B', text:'Dapat menggunakan alat dengan benar dan aman'}, {id:'C', text:'Merasa senang'}, {id:'D', text:'Bisa memperbaiki jika rusak'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 35, 
+    text: "Di rumah sakit sering terdapat tanda gambar rokok yang dicoret. Artinya adalah ....", 
+    options: [{id:'A', text:'Boleh merokok sepuasnya'}, {id:'B', text:'Dilarang merokok di area ini'}, {id:'C', text:'Jual rokok di sini'}, {id:'D', text:'Rokok sangat murah'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 36, 
+    text: "Kalimat petunjuk biasanya menggunakan kata kerja ....", 
+    options: [{id:'A', text:'Sifat'}, {id:'B', text:'Tanya'}, {id:'C', text:'Operasional/Tindakan'}, {id:'D', text:'Keterangan'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 37, 
+    text: "Petunjuk: 'Larutkan satu bungkus obat ke dalam air hangat'. Kalimat tersebut adalah bagian dari petunjuk ....", 
+    options: [{id:'A', text:'Membuat mainan'}, {id:'B', text:'Menggunakan obat'}, {id:'C', text:'Memasak nasi'}, {id:'D', text:'Membersihkan rumah'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 38, 
+    text: "Jika kita melihat papan petunjuk 'Jalur Evakuasi', papan tersebut berguna saat terjadi ....", 
+    options: [{id:'A', text:'Pesta'}, {id:'B', text:'Keadaan darurat/bencana'}, {id:'C', text:'Upacara'}, {id:'D', text:'Istirahat'}], 
+    correct: 'B' 
+  },
+
+  // --- PENGUMUMAN (39-44) ---
+  { 
+    id: 39, 
+    text: "Isi pengumuman harus bersifat .... agar mudah dipahami semua orang.", 
+    options: [{id:'A', text:'Rahasia'}, {id:'B', text:'Jelas dan terbuka'}, {id:'C', text:'Berbelit-belit'}, {id:'D', text:'Sangat lucu'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 40, 
+    text: "Bagian yang berisi orang atau pihak yang membuat pengumuman disebut ....", 
+    options: [{id:'A', text:'Isi pengumuman'}, {id:'B', text:'Penerima pengumuman'}, {id:'C', text:'Pembuat/Penandatangan'}, {id:'D', text:'Waktu pengumuman'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 41, 
+    text: "Kalimat pembuka pengumuman di sekolah yang tepat adalah ....", 
+    options: [{id:'A', text:'Diberitahukan kepada seluruh siswa...'}, {id:'B', text:'Hai kawan-kawan semua...'}, {id:'C', text:'Dulu kala ada sebuah berita...'}, {id:'D', text:'Tolong dengarkan saya...'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 42, 
+    text: "Dalam pengumuman kegiatan, hal penting yang harus dicantumkan adalah ....", 
+    options: [{id:'A', text:'Hobi panitia'}, {id:'B', text:'Waktu dan tempat pelaksanaan'}, {id:'C', text:'Daftar belanjaan'}, {id:'D', text:'Warna baju peserta'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 43, 
+    text: "Pengumuman yang disampaikan secara lisan biasanya terdengar melalui ....", 
+    options: [{id:'A', text:'Mading'}, {id:'B', text:'Pengeras suara/Loudspeaker'}, {id:'C', text:'Koran'}, {id:'D', text:'Majalah'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 44, 
+    text: "Tujuan utama pengumuman adalah ....", 
+    options: [{id:'A', text:'Menjual barang'}, {id:'B', text:'Memberikan informasi kepada khalayak'}, {id:'C', text:'Menceritakan dongeng'}, {id:'D', text:'Meminta maaf'}], 
+    correct: 'B' 
+  },
+
+  // --- KAIDAH MENULIS ANGKA DAN BILANGAN (45-50) ---
+  { 
+    id: 45, 
+    text: "Penulisan angka yang tepat di awal kalimat menurut kaidah bahasa Indonesia adalah ....", 
+    options: [{id:'A', text:'15 siswa hadir hari ini.'}, {id:'B', text:'Lima belas siswa hadir hari ini.'}, {id:'C', text:'15 Siswa hadir hari ini.'}, {id:'D', text:'5 belas siswa hadir hari ini.'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 46, 
+    text: "Jika bilangan dapat dinyatakan dengan satu atau dua kata, maka penulisan yang benar adalah ....", 
+    options: [{id:'A', text:'Ditulis dengan angka (5)'}, {id:'B', text:'Ditulis dengan huruf (lima)'}, {id:'C', text:'Boleh keduanya'}, {id:'D', text:'Ditulis miring'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 47, 
+    text: "Penulisan bilangan tingkat yang benar adalah ....", 
+    options: [{id:'A', text:'Abad ke 20'}, {id:'B', text:'Abad ke-20'}, {id:'C', text:'Abad ke XX'}, {id:'D', text:'Abad 20'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 48, 
+    text: "Pilihlah kalimat dengan penulisan angka yang benar ....", 
+    options: [{id:'A', text:'Ayah membeli tiga ekor ayam.'}, {id:'B', text:'Ayah membeli 3 ekor ayam.'}, {id:'C', text:'Ayah membeli III ekor ayam.'}, {id:'D', text:'Ayah membeli t-i-g-a ekor ayam.'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 49, 
+    text: "Untuk menyatakan jumlah yang besar (misal: uang atau penduduk), angka digunakan agar ....", 
+    options: [{id:'A', text:'Mudah dibaca'}, {id:'B', text:'Terlihat indah'}, {id:'C', text:'Menghemat kertas'}, {id:'D', text:'Terkesan modern'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 50, 
+    text: "Lambang bilangan pada awal kalimat tidak boleh ditulis dengan angka. Jika angka itu besar, maka caranya adalah ....", 
+    options: [{id:'A', text:'Tetap ditulis angka'}, {id:'B', text:'Mengubah susunan kalimatnya'}, {id:'C', text:'Dihapus saja angkanya'}, {id:'D', text:'Ditulis menggunakan angka romawi'}], 
+    correct: 'B' 
+  }
+    ];
+
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
+    let userData = { name: '', absen: '' };
+    let startTime;
+    let timerInterval;
+
+    function startExam() {
+        userData.name = document.getElementById('name').value.trim();
+        userData.absen = document.getElementById('absen').value.trim();
+
+        if (!userData.name || !userData.absen) {
+            alert("Isi Nama dan Absen!");
+            return;
+        }
+
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('exam-screen').classList.remove('hidden');
+        document.getElementById('total-questions').innerText = questions.length;
+        
+        startTime = new Date();
+        timerInterval = setInterval(updateTimer, 1000);
+        renderQuestion();
+    }
+
+    function updateTimer() {
+        const diff = Math.floor((new Date() - startTime) / 1000);
+        const m = Math.floor(diff / 60).toString().padStart(2, '0');
+        const s = (diff % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${m}:${s}`;
+    }
+
+    function renderQuestion() {
+        const q = questions[currentQuestionIndex];
+        document.getElementById('current-number').innerText = currentQuestionIndex + 1;
+        document.getElementById('question-text').innerText = q.text;
+        document.getElementById('progress-bar').style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.options.forEach(opt => {
+            const isSelected = userAnswers[currentQuestionIndex] === opt.id;
+            const div = document.createElement('div');
+            div.className = `option-item p-4 rounded-xl font-medium flex items-center shadow-sm ${isSelected ? 'selected-option' : ''}`;
+            div.innerHTML = `
+                <div class="w-7 h-7 rounded-full flex items-center justify-center mr-3 text-xs font-bold ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}">
+                    ${opt.id}
+                </div>
+                <span class="text-sm">${opt.text}</span>
+            `;
+            div.onclick = () => { 
+                userAnswers[currentQuestionIndex] = opt.id; 
+                renderQuestion(); 
+            };
+            container.appendChild(div);
+        });
+
+        document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+        document.getElementById('prev-btn').style.opacity = currentQuestionIndex === 0 ? '0.5' : '1';
+        document.getElementById('next-btn').innerText = currentQuestionIndex === questions.length - 1 ? "SELESAI" : "LANJUT";
+    }
+
+    function handleNext() {
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            renderQuestion();
+        } else {
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            renderQuestion();
+        }
+    }
+
+    function hideConfirm() { 
+        document.getElementById('confirm-modal').style.display = 'none'; 
+    }
+
+    async function finishExam() {
+        hideConfirm();
+        clearInterval(timerInterval);
+        document.getElementById('loading-overlay').style.display = 'flex';
+
+        let correct = 0;
+        questions.forEach((q, i) => { if (userAnswers[i] === q.correct) correct++; });
+        const score = Math.round((correct / questions.length) * 100);
+
+        const payload = new URLSearchParams();
+        payload.append('timestamp', new Date().toLocaleString());
+        payload.append('nama', userData.name);
+        payload.append('absen', userData.absen);
+        payload.append('skor', score);
+        payload.append('durasi', document.getElementById('timer').innerText);
+
+        try {
+            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: payload });
+            showResult(score, correct);
+        } catch (e) {
+            showResult(score, correct);
+        } finally {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+    }
+
+    function showResult(score, correct) {
+        document.getElementById('exam-screen').innerHTML = `
+            <div class="flex flex-col items-center justify-center text-center h-full py-6">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h1 class="text-xl font-black mb-1">UJIAN SELESAI</h1>
+                <p class="text-xs text-gray-500 mb-6">${userData.name} - Absen ${userData.absen}</p>
+                
+                <div class="text-6xl font-black text-blue-600 mb-6">${score}</div>
+
+                <div class="grid grid-cols-2 gap-3 w-full mb-6">
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <div class="text-[10px] text-gray-400">Benar</div>
+                        <div class="text-lg font-bold text-green-600">${correct}</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <div class="text-[10px] text-gray-400">Salah</div>
+                        <div class="text-lg font-bold text-red-500">${questions.length - correct}</div>
+                    </div>
+                </div>
+
+                <button onclick="location.reload()" class="btn-nav w-full py-3 uppercase">Kembali</button>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>
